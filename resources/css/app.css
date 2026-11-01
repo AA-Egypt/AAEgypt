@@ -1,9 +1,51 @@
 @import 'tailwindcss';
+@import 'leaflet/dist/leaflet.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+
+@font-face {
+    font-family: 'Cairo';
+    font-style: normal;
+    font-weight: 400 700;
+    font-display: swap;
+    src: url('/fonts/cairo.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Tajawal';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/fonts/tajawal-regular.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Tajawal';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('/fonts/tajawal-500.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Tajawal';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('/fonts/tajawal-700.woff2') format('woff2');
+}
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-cairo: 'Cairo', system-ui, sans-serif;
+    --font-tajawal: 'Tajawal', system-ui, sans-serif;
+}
+
+[dir="rtl"], [lang="ar"] {
+    font-family: 'Cairo', 'Tajawal', ui-sans-serif, system-ui, sans-serif;
+}
+
+[dir="ltr"], [lang="en"] {
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }

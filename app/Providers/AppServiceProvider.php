@@ -2,7 +2,14 @@
 
 namespace App\Providers;
 
+use App\Models\Document;
+use App\Models\Meeting;
+use App\Policies\DocumentPolicy;
+use App\Policies\MeetingPolicy;
+use App\Services\AuditLogger;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -11,7 +18,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        if (! class_exists('AuditLogger')) {
+            class_alias(AuditLogger::class, 'AuditLogger');
+        }
     }
 
     /**
@@ -19,6 +28,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Password::defaults(function () {
+            return Password::min(12)->uncompromised();
+        });
+
+        Gate::policy(Meeting::class, MeetingPolicy::class);
+        Gate::policy(Document::class, DocumentPolicy::class);
     }
 }

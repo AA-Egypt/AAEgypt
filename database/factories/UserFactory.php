@@ -26,9 +26,13 @@ class UserFactory extends Factory
     {
         return [
             'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            'email' => fake()->unique()->userName().'@aaegypt.org',
             'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
+            'password' => static::$password ??= Hash::make('AaEgypt#Service2026!Valid'),
+            'role' => 'gsr',
+            'group_id' => null,
+            'must_change_password' => false,
+            'is_suspended' => false,
             'remember_token' => Str::random(10),
         ];
     }
@@ -40,6 +44,38 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    public function webAdmin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'web_admin',
+            'group_id' => null,
+        ]);
+    }
+
+    public function gsr(?int $groupId = null): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'gsr',
+            'group_id' => $groupId,
+        ]);
+    }
+
+    public function delegate(?int $groupId = null): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'delegate',
+            'group_id' => $groupId,
+        ]);
+    }
+
+    public function servicePosition(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'service_position',
+            'group_id' => null,
         ]);
     }
 }
