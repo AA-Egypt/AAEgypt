@@ -146,6 +146,26 @@ class Meeting extends Model
     }
 
     /**
+     * Get the formatted end time in Africa/Cairo timezone (e.g. "8:30 PM").
+     */
+    public function getEndTimeFormattedAttribute(): ?string
+    {
+        if (empty($this->end_time)) {
+            return null;
+        }
+
+        try {
+            return Carbon::createFromFormat('H:i', $this->end_time, self::TIMEZONE)->format('g:i A');
+        } catch (\Throwable) {
+            try {
+                return Carbon::parse($this->end_time, self::TIMEZONE)->format('g:i A');
+            } catch (\Throwable) {
+                return $this->end_time;
+            }
+        }
+    }
+
+    /**
      * Check if the meeting occurs today strictly in Africa/Cairo timezone.
      */
     public function getIsTodayAttribute(): bool

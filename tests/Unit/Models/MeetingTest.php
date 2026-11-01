@@ -421,4 +421,3 @@ class MeetingTest extends TestCase
         $this->assertTrue($validator2->passes());
     }
 }
-

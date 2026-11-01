@@ -142,4 +142,3 @@ class MeetingFormRequest extends FormRequest
         });
     }
 }
-

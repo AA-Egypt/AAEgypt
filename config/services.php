@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'osm' => [
+        'tile_server' => env('OSM_TILE_SERVER', 'https://tile.openstreetmap.org'),
+        'user_agent' => env('OSM_USER_AGENT', 'AA-Egypt-TileProxy/1.0 (info@aa-egypt.org)'),
+    ],
+
 ];

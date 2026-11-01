@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Public\MapTileController;
 use App\Http\Controllers\Public\PageController;
 use App\Http\Controllers\Public\SearchController;
 use App\Http\Controllers\Service\AppPasswordController;
@@ -27,6 +28,9 @@ Route::get('/search', function (Request $request) {
     return redirect('/ar/search'.($queryString ? '?'.$queryString : ''));
 });
 
+Route::get('/tiles/{z}/{x}/{y}.png', [MapTileController::class, 'show'])->name('tiles.show');
+Route::get('/tiles/{z}/{x}/{y}', [MapTileController::class, 'show']);
+
 Route::prefix('{locale}')
     ->whereIn('locale', ['ar', 'en'])
     ->middleware(['web', SetLocale::class])
@@ -43,8 +47,17 @@ Route::prefix('{locale}')
             return view('public.privacy');
         })->name('public.privacy');
 
-        Route::get('/meetings', function () {
-            return view('public.meetings');
+        Route::get('/meetings', function (Request $request) {
+            $query = Meeting::with('group')
+                ->where('is_active', true);
+
+            if ($request->filled('city')) {
+                $query->byCity($request->query('city'));
+            }
+
+            $meetings = $query->get();
+
+            return view('public.meetings.index', ['meetings' => $meetings]);
         })->name('public.meetings');
 
         Route::get('/search', [SearchController::class, 'index'])
@@ -73,6 +86,9 @@ Route::middleware(['auth', 'mfa.enrolled'])->group(function () {
     Route::get('/service', function () {
         return response('Service Dashboard');
     })->name('service.index');
+
+    require __DIR__.'/service.php';
+
     Route::get('/service/{any}', function () {
         return response('Service Area');
     })->where('any', '.*');
