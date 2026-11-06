@@ -369,4 +369,37 @@ JS;
         $this->assertSame('[12.0 km away]', $badges['badge2']);
         $this->assertSame('[0.5 km away]', $badges['badge3']);
     }
+
+    /**
+     * Test inactive meetings are excluded from public meetings page.
+     */
+    public function test_inactive_meetings_are_excluded_from_public_page(): void
+    {
+        $group = Group::create([
+            'name_en' => 'Zamalek Group',
+            'name_ar' => 'مجموعة الزمالك',
+            'slug' => 'zamalek-group',
+        ]);
+
+        $activeMeeting = Meeting::create([
+            'group_id' => $group->id,
+            'name' => 'Active Zamalek Meeting',
+            'day_of_week' => 1,
+            'city' => 'Cairo',
+            'is_active' => true,
+        ]);
+
+        $inactiveMeeting = Meeting::create([
+            'group_id' => $group->id,
+            'name' => 'Inactive Zamalek Meeting',
+            'day_of_week' => 1,
+            'city' => 'Cairo',
+            'is_active' => false,
+        ]);
+
+        $response = $this->get('/ar/meetings');
+        $response->assertOk();
+        $response->assertSee('Active Zamalek Meeting');
+        $response->assertDontSee('Inactive Zamalek Meeting');
+    }
 }
