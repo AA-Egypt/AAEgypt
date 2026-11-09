@@ -28,6 +28,7 @@ class BilingualRoutingTest extends TestCase
         $response->assertOk();
         $response->assertSee('dir="rtl"', false);
         $response->assertSee('lang="ar"', false);
+        $response->assertSee('fonts/alyamama-arabic.woff2', false);
         $this->assertSame('ar', App::getLocale());
     }
 
@@ -41,6 +42,7 @@ class BilingualRoutingTest extends TestCase
         $response->assertOk();
         $response->assertSee('dir="ltr"', false);
         $response->assertSee('lang="en"', false);
+        $response->assertDontSee('fonts/alyamama-arabic.woff2', false);
         $this->assertSame('en', App::getLocale());
     }
 

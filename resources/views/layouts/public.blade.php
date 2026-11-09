@@ -10,6 +10,10 @@
     <link rel="icon" type="image/png" href="{{ asset('images/emblem.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/emblem.png') }}">
 
+    @if (app()->getLocale() === 'ar')
+    <link rel="preload" href="{{ asset('fonts/alyamama-arabic.woff2') }}" as="font" type="font/woff2" crossorigin>
+    @endif
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>
