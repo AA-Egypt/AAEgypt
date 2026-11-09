@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Public\MapTileController;
 use App\Http\Controllers\Public\PageController;
 use App\Http\Controllers\Public\SearchController;
@@ -69,9 +70,7 @@ Route::prefix('{locale}')
             ->name('public.page');
     });
 
-Route::get('/dashboard', function () {
-    return response('Dashboard');
-})->middleware(['auth'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth'])->name('dashboard');
 
 // Protected service and admin routes requiring MFA
 Route::middleware(['auth', 'mfa.enrolled'])->group(function () {
@@ -83,9 +82,7 @@ Route::middleware(['auth', 'mfa.enrolled'])->group(function () {
     Route::post('/app-passwords', [AppPasswordController::class, 'store'])->name('app-passwords.store');
     Route::delete('/app-passwords/{appPassword}', [AppPasswordController::class, 'destroy'])->name('app-passwords.destroy');
 
-    Route::get('/service', function () {
-        return response('Service Dashboard');
-    })->name('service.index');
+    Route::get('/service', [DashboardController::class, 'index'])->name('service.index');
 
     require __DIR__.'/service.php';
 
