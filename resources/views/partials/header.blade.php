@@ -7,13 +7,16 @@
     if (!empty($segments) && in_array($segments[0], ['ar', 'en'], true)) {
         $segments[0] = $targetLocale;
         $switchUrl = url(implode('/', $segments));
+        if ($queryString = request()->getQueryString()) {
+            $switchUrl .= '?' . $queryString;
+        }
     } elseif (empty($segments)) {
         $switchUrl = url($targetLocale);
+        if ($queryString = request()->getQueryString()) {
+            $switchUrl .= '?' . $queryString;
+        }
     } else {
-        $switchUrl = url($targetLocale . '/' . implode('/', $segments));
-    }
-    if ($queryString = request()->getQueryString()) {
-        $switchUrl .= '?' . $queryString;
+        $switchUrl = request()->fullUrlWithQuery(['locale' => $targetLocale]);
     }
 
     $navItems = [
@@ -82,7 +85,7 @@
                             {{ __('Dashboard') }}
                         </a>
                     @else
-                        <a href="{{ route('login') }}" class="text-sm font-medium text-slate-600 hover:text-emerald-700">
+                        <a href="{{ route('login') }}" class="text-sm font-medium {{ request()->routeIs('login') ? 'text-emerald-700 font-semibold' : 'text-slate-600 hover:text-emerald-700' }}">
                             {{ __('Log in') }}
                         </a>
                     @endauth

@@ -67,4 +67,3 @@ class FilamentTranslationManagerTest extends TestCase
         $response->assertOk();
     }
 }
-

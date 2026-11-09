@@ -65,6 +65,14 @@ Route::prefix('{locale}')
             ->middleware('throttle:30,1')
             ->name('public.search');
 
+        Route::get('/login', function (string $locale) {
+            if (request()->hasSession()) {
+                session(['locale' => $locale]);
+            }
+
+            return redirect()->route('login');
+        });
+
         Route::get('/{slug}', [PageController::class, 'show'])
             ->where('slug', '[a-zA-Z0-9_-]+')
             ->name('public.page');
