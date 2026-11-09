@@ -7,6 +7,9 @@
 
     <title>{{ isset($title) ? $title . ' - ' : '' }}{{ config('app.name', 'A.A. Egypt') }}</title>
 
+    <link rel="icon" type="image/png" href="{{ asset('images/emblem.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/emblem.png') }}">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>

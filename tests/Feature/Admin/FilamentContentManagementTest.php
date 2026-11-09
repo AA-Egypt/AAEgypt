@@ -96,6 +96,20 @@ class FilamentContentManagementTest extends TestCase
         $response->assertSee('dir="ltr"', false);
     }
 
+    public function test_filament_panel_defaults_to_english_ltr_interface(): void
+    {
+        $admin = $this->createWebAdmin();
+
+        $response = $this->actingAs($admin)
+            ->withSession([
+                'mfa_verified' => true,
+            ])
+            ->get('/admin');
+
+        $response->assertOk();
+        $response->assertSee('dir="ltr"', false);
+    }
+
     public function test_non_admin_users_cannot_access_page_resource(): void
     {
         $gsr = $this->createGsr();

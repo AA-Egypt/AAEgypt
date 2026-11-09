@@ -30,7 +30,7 @@
             <!-- Brand / Logo -->
             <div class="flex items-center">
                 <a href="{{ url($currentLocale) }}" class="flex items-center gap-2 text-emerald-800 font-bold text-xl tracking-tight text-start">
-                    <span class="text-2xl" aria-hidden="true">🌱</span>
+                    <img src="{{ asset('images/emblem.png') }}" alt="{{ config('app.name', 'A.A. Egypt') }}" class="h-9 w-9 object-contain" />
                     <span>{{ config('app.name', 'A.A. Egypt') }}</span>
                 </a>
             </div>

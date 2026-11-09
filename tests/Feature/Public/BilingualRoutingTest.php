@@ -9,13 +9,13 @@ use Tests\TestCase;
 class BilingualRoutingTest extends TestCase
 {
     /**
-     * Test root URL automatically redirects to /ar.
+     * Test root URL automatically redirects to /en.
      */
-    public function test_root_url_redirects_to_arabic_prefix(): void
+    public function test_root_url_redirects_to_english_prefix(): void
     {
         $response = $this->get('/');
 
-        $response->assertRedirect('/ar');
+        $response->assertRedirect('/en');
     }
 
     /**
@@ -119,12 +119,12 @@ class BilingualRoutingTest extends TestCase
     }
 
     /**
-     * Test unprefixed public routes redirect to /ar prefix.
+     * Test unprefixed public routes redirect to /en prefix.
      */
-    public function test_unprefixed_public_routes_redirect_to_arabic_prefix(): void
+    public function test_unprefixed_public_routes_redirect_to_english_prefix(): void
     {
-        $this->get('/who-we-are')->assertRedirect('/ar/who-we-are');
-        $this->get('/privacy')->assertRedirect('/ar/privacy');
+        $this->get('/who-we-are')->assertRedirect('/en/who-we-are');
+        $this->get('/privacy')->assertRedirect('/en/privacy');
     }
 
     /**

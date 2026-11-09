@@ -16,16 +16,16 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return redirect('/ar');
+    return redirect('/en');
 });
 
-Route::redirect('/who-we-are', '/ar/who-we-are');
-Route::redirect('/privacy', '/ar/privacy');
-Route::redirect('/meetings', '/ar/meetings');
+Route::redirect('/who-we-are', '/en/who-we-are');
+Route::redirect('/privacy', '/en/privacy');
+Route::redirect('/meetings', '/en/meetings');
 Route::get('/search', function (Request $request) {
     $queryString = $request->getQueryString();
 
-    return redirect('/ar/search'.($queryString ? '?'.$queryString : ''));
+    return redirect('/en/search'.($queryString ? '?'.$queryString : ''));
 });
 
 Route::get('/tiles/{z}/{x}/{y}.png', [MapTileController::class, 'show'])->name('tiles.show');

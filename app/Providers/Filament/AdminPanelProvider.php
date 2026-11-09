@@ -29,6 +29,10 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->brandName('A.A. Egypt')
+            ->brandLogo(fn () => asset('images/emblem.png'))
+            ->brandLogoHeight('2.5rem')
+            ->favicon(asset('images/emblem.png'))
             ->colors([
                 'primary' => Color::Amber,
             ])

@@ -29,7 +29,7 @@ function escapeHtml(str) {
 /**
  * Render a bilingual popup card with meeting/group name, address, time, and directions.
  */
-export function createPopupContent(marker, locale = 'ar') {
+export function createPopupContent(marker, locale = 'en') {
     const isAr = locale === 'ar';
     const groupNameAr = marker.group_name_ar || '';
     const groupNameEn = marker.group_name_en || '';
@@ -93,7 +93,7 @@ export function initMeetingMap(element) {
     let center = [30.0444, 31.2357]; // Centered on Cairo
     let zoom = 11;
     let markers = [];
-    const locale = element.dataset.locale || document.documentElement.lang || 'ar';
+    const locale = element.dataset.locale || document.documentElement.lang || 'en';
 
     if (element.dataset.center) {
         try {

@@ -29,7 +29,7 @@ class SetLocale
         } elseif ($request->hasSession() && session()->has('locale') && in_array(session('locale'), ['ar', 'en'])) {
             $locale = session('locale');
         } else {
-            $locale = App::getLocale() ?: 'ar';
+            $locale = App::getLocale() ?: 'en';
         }
 
         App::setLocale($locale);

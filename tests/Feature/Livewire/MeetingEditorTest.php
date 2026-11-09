@@ -307,4 +307,3 @@ class MeetingEditorTest extends TestCase
             ->assertHasErrors(['name', 'address']);
     }
 }
-

@@ -29,13 +29,13 @@ class SearchTest extends TestCase
     }
 
     /**
-     * Test unprefixed /search redirects to /ar/search.
+     * Test unprefixed /search redirects to /en/search.
      */
-    public function test_unprefixed_search_redirects_to_arabic_prefix(): void
+    public function test_unprefixed_search_redirects_to_english_prefix(): void
     {
         $response = $this->get('/search?q=cairo');
 
-        $response->assertRedirect('/ar/search?q=cairo');
+        $response->assertRedirect('/en/search?q=cairo');
     }
 
     /**

@@ -141,9 +141,9 @@ class ZeroCookieComplianceTest extends TestCase
      */
     public function test_privacy_policy_renders_appendices_a_and_b_with_egyptian_disclosures(): void
     {
-        // 1. Verify unprefixed /privacy redirects to /ar/privacy with zero cookies
+        // 1. Verify unprefixed /privacy redirects to /en/privacy with zero cookies
         $redirectResponse = $this->get('/privacy');
-        $redirectResponse->assertRedirect('/ar/privacy');
+        $redirectResponse->assertRedirect('/en/privacy');
         $redirectResponse->assertHeaderMissing('Set-Cookie');
 
         // 2. Arabic Privacy Policy Verification

@@ -387,4 +387,3 @@ class MeetingEditor extends Component
             ->layout('layouts.public', ['title' => 'Meeting Editor - Service']);
     }
 }
-
