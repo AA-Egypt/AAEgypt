@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Document;
 use App\Models\Meeting;
+use App\Models\User;
 use App\Policies\DocumentPolicy;
 use App\Policies\MeetingPolicy;
 use App\Services\AuditLogger;
@@ -34,5 +35,9 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::policy(Meeting::class, MeetingPolicy::class);
         Gate::policy(Document::class, DocumentPolicy::class);
+
+        Gate::define('use-translation-manager', function (?User $user = null): bool {
+            return $user?->role === 'web_admin';
+        });
     }
 }
