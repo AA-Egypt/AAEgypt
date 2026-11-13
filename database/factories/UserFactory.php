@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -76,6 +77,22 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'role' => 'service_position',
             'group_id' => null,
+        ]);
+    }
+
+    public function treasurer(?int $groupId = null): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'treasurer',
+            'group_id' => $groupId,
+        ]);
+    }
+
+    public function withMfa(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'totp_secret' => Crypt::encryptString('JBSWY3DPEHPK3PXP'),
+            'must_change_password' => false,
         ]);
     }
 }

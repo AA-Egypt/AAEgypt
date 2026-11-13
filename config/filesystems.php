@@ -47,6 +47,13 @@ return [
             'report' => false,
         ],
 
+        'dms_vault' => [
+            'driver' => 'local',
+            'root' => storage_path('app/dms_vault'),
+            'throw' => false,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

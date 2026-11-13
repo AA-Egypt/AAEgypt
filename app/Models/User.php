@@ -140,4 +140,29 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->role === 'web_admin';
     }
+
+    public function isWebAdmin(): bool
+    {
+        return $this->role === 'web_admin';
+    }
+
+    public function isTreasurer(): bool
+    {
+        if ($this->role === 'treasurer' || $this->role === 'web_admin') {
+            return true;
+        }
+
+        return $this->serviceTerms()
+            ->where(function ($q) {
+                $q->where('position_title', 'like', '%treasurer%')
+                    ->orWhere('position_title', 'like', '%خازن%')
+                    ->orWhere('position_title', 'like', '%أم%صندوق%');
+            })
+            ->exists();
+    }
+
+    public function dmsDocuments(): HasMany
+    {
+        return $this->hasMany(DmsDocument::class);
+    }
 }

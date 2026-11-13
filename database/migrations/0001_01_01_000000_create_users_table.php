@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('role', ['web_admin', 'gsr', 'delegate', 'service_position'])->default('gsr');
+            $table->enum('role', ['web_admin', 'gsr', 'delegate', 'service_position', 'treasurer'])->default('gsr');
             $table->foreignId('group_id')->nullable();
             $table->boolean('must_change_password')->default(false);
             $table->boolean('is_suspended')->default(false);
