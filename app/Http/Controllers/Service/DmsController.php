@@ -164,22 +164,7 @@ class DmsController extends Controller
      */
     public function download(Request $request, DmsDocument $document): BinaryFileResponse
     {
-        $user = $request->user();
-
-        if (! $document->canUserAccess($user, 'download')) {
-            abort(403, 'You do not have permission to download this document.');
-        }
-
-        $fullPath = storage_path('app/dms_vault/'.ltrim($document->file_path, '/'));
-
-        if (! file_exists($fullPath)) {
-            abort(404, 'Document file not found on storage server.');
-        }
-
-        return response()->download($fullPath, $document->original_name, [
-            'X-Robots-Tag' => 'noindex, nofollow',
-            'Content-Type' => $document->mime_type,
-        ]);
+        return app(DmsDownloadController::class)->download($document);
     }
 
     /**

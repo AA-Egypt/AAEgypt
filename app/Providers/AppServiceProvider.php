@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\DmsDocument;
 use App\Models\Document;
 use App\Models\Meeting;
 use App\Models\User;
@@ -35,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::policy(Meeting::class, MeetingPolicy::class);
         Gate::policy(Document::class, DocumentPolicy::class);
+        Gate::policy(DmsDocument::class, DocumentPolicy::class);
 
         Gate::define('use-translation-manager', function (?User $user = null): bool {
             return $user?->role === 'web_admin';

@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Models\DmsDocument;
 use App\Models\Document;
 use App\Models\User;
 
@@ -69,5 +70,29 @@ class DocumentPolicy
     public function delete(User $user, Document $document): bool
     {
         return $user->role === 'web_admin';
+    }
+
+    /**
+     * Determine whether the user can download the document.
+     */
+    public static function download(User $user, DmsDocument|Document $document): bool
+    {
+        if ($document instanceof DmsDocument) {
+            return $document->canUserAccess($user, 'download');
+        }
+
+        if ($user->role === 'web_admin') {
+            return true;
+        }
+
+        if (in_array($user->role, ['gsr', 'delegate', 'service_position', 'treasurer'], true)) {
+            if (! empty($document->group_id)) {
+                return ! empty($user->group_id) && (int) $user->group_id === (int) $document->group_id;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 }

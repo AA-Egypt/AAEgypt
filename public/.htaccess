@@ -18,6 +18,10 @@
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
+    # Block direct access to storage vault and internal application storage
+    RewriteRule ^storage/app/(.*)$ - [F,L]
+    RewriteRule ^storage/dms_vault/(.*)$ - [F,L]
+
     # Send Requests To Front Controller...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
