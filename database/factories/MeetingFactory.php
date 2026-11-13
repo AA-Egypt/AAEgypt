@@ -41,6 +41,7 @@ class MeetingFactory extends Factory
             'language' => 'ar',
             'notes' => fake()->sentence(6),
             'is_active' => true,
+            'version' => 1,
         ];
     }
 }

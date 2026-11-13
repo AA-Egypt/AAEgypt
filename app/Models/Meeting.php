@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 class Meeting extends Model
@@ -37,12 +38,14 @@ class Meeting extends Model
         'notes',
         'search_vector',
         'is_active',
+        'version',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'latitude' => 'float',
         'longitude' => 'float',
+        'version' => 'integer',
     ];
 
     protected static function booted(): void
@@ -93,6 +96,11 @@ class Meeting extends Model
     public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class);
+    }
+
+    public function revisions(): HasMany
+    {
+        return $this->hasMany(MeetingRevision::class)->latest('id');
     }
 
     public function getNameAttribute($value): ?string

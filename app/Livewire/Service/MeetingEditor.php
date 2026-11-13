@@ -4,7 +4,9 @@ namespace App\Livewire\Service;
 
 use App\Models\Group;
 use App\Models\Meeting;
+use App\Models\MeetingRevision;
 use App\Services\AuditLogger;
+use App\Services\Meeting\MeetingRevisionService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -59,6 +61,19 @@ class MeetingEditor extends Component
     public ?string $notes = '';
 
     public ?string $online_link = '';
+
+    public int $form_version = 1;
+
+    public bool $showConflictModal = false;
+
+    public bool $hasConflict = false;
+
+    /**
+     * @var array<string, array<string, mixed>>
+     */
+    public array $conflictDiffs = [];
+
+    public ?string $conflictMessage = null;
 
     /**
      * Mount the component and load meetings for the authenticated user's group.
@@ -155,6 +170,11 @@ class MeetingEditor extends Component
         $this->language = $meeting->language ?? 'ar';
         $this->notes = $meeting->notes ?? '';
         $this->online_link = $meeting->online_link ?? '';
+        $this->form_version = (int) ($meeting->version ?? 1);
+        $this->showConflictModal = false;
+        $this->hasConflict = false;
+        $this->conflictDiffs = [];
+        $this->conflictMessage = null;
 
         $this->resetValidation();
     }
@@ -267,6 +287,7 @@ class MeetingEditor extends Component
             'notes' => ['nullable', 'string'],
             'city' => ['nullable', 'string', 'max:255'],
             'online_link' => ['nullable', 'string', 'max:255'],
+            'form_version' => ['nullable', 'integer'],
         ];
     }
 
@@ -336,6 +357,42 @@ class MeetingEditor extends Component
 
         $this->validate();
 
+        $meeting->refresh();
+
+        // Optimistic locking check: form_version must match $meeting->version
+        if ((int) $this->form_version !== (int) $meeting->version) {
+            $revisionService = app(MeetingRevisionService::class);
+            $this->conflictDiffs = $revisionService->getConflictDiffs(
+                $meeting,
+                (int) $this->form_version,
+                $this->getFormPayload()
+            );
+
+            $this->hasConflict = true;
+            $this->showConflictModal = true;
+
+            $changedBy = ! empty($this->conflictDiffs)
+                ? (reset($this->conflictDiffs)['changed_by'] ?? 'another servant')
+                : 'another servant';
+
+            $this->conflictMessage = "Conflict detected: This meeting was updated by {$changedBy} while you were editing (server version: {$meeting->version}, your version: {$this->form_version}). Please review the changes below.";
+
+            $this->addError('form_version', $this->conflictMessage);
+            session()->flash('conflict_error', $this->conflictMessage);
+
+            $this->dispatch('conflict-detected', [
+                'diffs' => $this->conflictDiffs,
+                'message' => $this->conflictMessage,
+                'version' => $meeting->version,
+            ]);
+
+            return;
+        }
+
+        $revisionService = app(MeetingRevisionService::class);
+        $oldSnapshot = $revisionService->extractSnapshot($meeting);
+        $newVersion = (int) ($meeting->version ?? 1) + 1;
+
         $before = $meeting->only([
             'name', 'title', 'day_of_week', 'start_time', 'end_time', 'time',
             'venue_address', 'venue', 'city', 'latitude', 'longitude', 'type',
@@ -358,11 +415,22 @@ class MeetingEditor extends Component
             'language' => $this->language,
             'notes' => $this->notes,
             'online_link' => $this->online_link,
+            'version' => $newVersion,
         ]);
+
+        $newSnapshot = $revisionService->extractSnapshot($meeting);
+        $revisionService->record(
+            meeting: $meeting,
+            oldPayload: $oldSnapshot,
+            newPayload: $newSnapshot,
+            userId: $user->id,
+            version: $newVersion
+        );
 
         AuditLogger::log('update', 'Meeting', $meeting->id, [
             'before' => $before,
             'changes' => $meeting->getChanges(),
+            'version' => $newVersion,
         ]);
 
         $this->loadMeetings();
@@ -376,6 +444,94 @@ class MeetingEditor extends Component
         $this->dispatch('meeting-updated', message: $flashMessage);
         $this->dispatch('notify', message: $flashMessage);
         $this->dispatch('flash', message: $flashMessage);
+    }
+
+    /**
+     * Get associative array of the form inputs for comparison and payload snapshots.
+     *
+     * @return array<string, mixed>
+     */
+    public function getFormPayload(): array
+    {
+        return [
+            'name' => $this->name,
+            'title' => $this->title ?: $this->name,
+            'day_of_week' => $this->day_of_week !== null ? (int) $this->day_of_week : null,
+            'start_time' => $this->start_time,
+            'end_time' => $this->end_time,
+            'time' => $this->start_time,
+            'venue_address' => $this->address ?: $this->venue_address,
+            'venue' => $this->address ?: $this->venue_address,
+            'city' => $this->city,
+            'latitude' => $this->latitude,
+            'longitude' => $this->longitude,
+            'type' => $this->type,
+            'language' => $this->language,
+            'notes' => $this->notes,
+            'online_link' => $this->online_link,
+        ];
+    }
+
+    /**
+     * Resolve conflict by discarding local edits and reloading the latest meeting from server.
+     */
+    public function resolveConflictReload(): void
+    {
+        $targetId = $this->meetingId ?? $this->selectedMeetingId;
+        if ($targetId) {
+            $meeting = Meeting::findOrFail($targetId);
+            $this->fillForm($meeting);
+        }
+    }
+
+    /**
+     * Resolve conflict by overwriting server version with current form inputs.
+     */
+    public function resolveConflictOverwrite(): void
+    {
+        $targetId = $this->meetingId ?? $this->selectedMeetingId;
+        if ($targetId) {
+            $meeting = Meeting::findOrFail($targetId);
+            $this->form_version = (int) $meeting->version;
+            $this->showConflictModal = false;
+            $this->hasConflict = false;
+            $this->conflictDiffs = [];
+            $this->save();
+        }
+    }
+
+    /**
+     * 1-Click restore of a meeting revision.
+     */
+    public function restore(int $revisionId): void
+    {
+        $user = Auth::user();
+        if (! $user) {
+            abort(401);
+        }
+
+        $revision = MeetingRevision::with('meeting')->findOrFail($revisionId);
+        $meeting = $revision->meeting;
+
+        if ($user->role !== 'web_admin' && (int) $meeting->group_id !== (int) $user->group_id) {
+            abort(403, 'Forbidden. You can only restore your assigned group\'s meetings.');
+        }
+
+        Gate::authorize('update', $meeting);
+
+        $service = app(MeetingRevisionService::class);
+        $restored = $service->restore($revision, $user->id);
+
+        $this->loadMeetings();
+        $this->selectMeeting($restored->id);
+
+        $flashMessage = "Meeting restored to version {$revision->version} and live on website.";
+        session()->flash('message', $flashMessage);
+        session()->flash('success', $flashMessage);
+        session()->flash('status', $flashMessage);
+
+        $this->dispatch('meeting-restored', revisionId: $revisionId, version: $restored->version);
+        $this->dispatch('meeting-updated', message: $flashMessage);
     }
 
     /**
