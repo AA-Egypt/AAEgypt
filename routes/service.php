@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\DmsAuditViewController;
 use App\Http\Controllers\Service\DmsController;
 use App\Http\Controllers\Service\DmsDownloadController;
 use App\Http\Controllers\Service\DmsUploadController;
@@ -29,6 +30,8 @@ Route::middleware(['auth', 'mfa.enrolled'])->group(function () {
 
     // Aliases
     Route::get('/service/dms', [DmsController::class, 'index'])->name('service.dms.index');
+    Route::get('/service/documents/audit-logs', [DmsAuditViewController::class, 'index'])->name('service.documents.audit-logs');
+    Route::get('/service/documents/audit-logs', [\App\Http\Controllers\Admin\DmsAuditViewController::class, 'index'])->name('service.documents.audit-logs');
 });
 
 // DMS subdomain routing - dms.aaegypt.org

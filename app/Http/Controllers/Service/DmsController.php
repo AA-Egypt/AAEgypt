@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Service;
 use App\Http\Controllers\Controller;
 use App\Models\DmsDocument;
 use App\Models\DmsFolder;
+use App\Services\Dms\Audit\DmsAuditLogger;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Str;
@@ -146,6 +147,12 @@ class DmsController extends Controller
             'status' => 'clean',
         ]);
 
+        // Record in append-only DMS audit log
+        DmsAuditLogger::logUpload($document, $user, $request->ip());
+        if ($document->version > 1) {
+            DmsAuditLogger::logVersionBump($document, $user, $request->ip());
+        }
+
         if ($request->wantsJson()) {
             return response()->json([
                 'message' => 'Document uploaded successfully',
@@ -184,6 +191,9 @@ class DmsController extends Controller
         if (file_exists($fullPath)) {
             @unlink($fullPath);
         }
+
+        // Record in append-only DMS audit log
+        DmsAuditLogger::logDelete($document, $user, $request->ip());
 
         $document->delete();
 

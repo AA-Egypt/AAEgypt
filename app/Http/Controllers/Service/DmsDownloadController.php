@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\DmsDocument;
 use App\Policies\DocumentPolicy;
 use App\Services\AuditLogger;
+use App\Services\Dms\Audit\DmsAuditLogger;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class DmsDownloadController extends Controller
@@ -61,6 +62,9 @@ class DmsDownloadController extends Controller
             ],
             userId: $user->id,
         );
+
+        // Record in append-only DMS audit log
+        DmsAuditLogger::logDownload($document, $user, request()?->ip());
 
         $response = response()->download($vaultPath, $cleanFileName, $headers);
         $response->setPrivate();

@@ -1,8 +1,10 @@
 <?php
 
+use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
+use Monolog\Level;
 use Monolog\Processor\PsrLogMessageProcessor;
 
 return [
@@ -51,6 +53,24 @@ return [
     */
 
     'channels' => [
+
+        'dms_audit' => [
+            'driver' => 'monolog',
+            'handler' => StreamHandler::class,
+            'handler_with' => [
+                'stream' => env('DMS_AUDIT_LOG_PATH', (is_dir('/var/log/aaegypt') && is_writable('/var/log/aaegypt')) ? '/var/log/aaegypt/dms-audit.log' : storage_path('logs/dms-audit.log')),
+                'level' => Level::Info,
+                'bubble' => true,
+                'filePermission' => 0640,
+            ],
+            'formatter' => LineFormatter::class,
+            'formatter_with' => [
+                'format' => "%message%\n",
+                'dateFormat' => null,
+                'allowInlineLineBreaks' => true,
+                'ignoreEmptyContextAndExtra' => true,
+            ],
+        ],
 
         'stack' => [
             'driver' => 'stack',

@@ -6,6 +6,7 @@ use App\Models\DmsDocument;
 use App\Models\User;
 use App\Notifications\DocumentInfectedNotification;
 use App\Services\AuditLogger;
+use App\Services\Dms\Audit\DmsAuditLogger;
 use App\Services\Dms\Sanitizer\DocumentSanitizerService;
 use App\Services\Dms\Sanitizer\SanitizerResult;
 use Illuminate\Bus\Queueable;
@@ -137,6 +138,9 @@ class ProcessDmsUploadJob implements ShouldQueue
             ],
             userId: $document->user_id,
         );
+
+        // Record scan pass in append-only DMS audit log
+        DmsAuditLogger::logScanPass($document);
     }
 
     /**
@@ -183,6 +187,9 @@ class ProcessDmsUploadJob implements ShouldQueue
             ],
             userId: $document->user_id,
         );
+
+        // Record scan fail in append-only DMS audit log
+        DmsAuditLogger::logScanFail($document);
 
         // Notify uploader and Web Admins
         $this->notifyParties($document, $reason, $result->details);

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Jobs\ProcessDmsUploadJob;
 use App\Models\DmsDocument;
 use App\Models\DmsFolder;
+use App\Services\Dms\Audit\DmsAuditLogger;
 use App\Services\Dms\Sanitizer\DocumentSanitizerService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -87,6 +88,12 @@ class DmsUploadController extends Controller
             'version' => $version,
             'status' => 'processing',
         ]);
+
+        // Record in append-only DMS audit log
+        DmsAuditLogger::logUpload($document, $user, $request->ip());
+        if ($document->version > 1) {
+            DmsAuditLogger::logVersionBump($document, $user, $request->ip());
+        }
 
         // Dispatch background processing job
         ProcessDmsUploadJob::dispatch($documentId);

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\DmsAuditViewController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Public\MapTileController;
 use App\Http\Controllers\Public\PageController;
@@ -12,6 +13,7 @@ use App\Models\Group;
 use App\Models\Meeting;
 use App\Models\User;
 use App\Services\AuditLogger;
+use App\Services\Dms\Audit\DmsAuditLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
@@ -216,12 +218,31 @@ Route::middleware(['auth'])->group(function () {
             'after' => ['role' => $targetUser->role, 'group_id' => $targetUser->group_id],
         ]);
 
+        // Record permission change in DMS audit log
+        DmsAuditLogger::logPermissionChange([
+            'doc_id' => 'user_'.$targetUser->id,
+            'doc_name' => 'access_matrix_'.$targetUser->email,
+            'group_id' => $targetUser->group_id,
+            'user_id' => $request->user()->id,
+            'user_email' => $request->user()->email,
+            'sha256' => '',
+            'status' => 'clean',
+        ], $request->user(), $request->ip(), [
+            'target_user_id' => $targetUser->id,
+            'new_role' => $targetUser->role,
+        ]);
+
         return response()->json([
             'message' => 'Access matrix updated successfully',
             'user' => $targetUser,
             'audit_log' => $log,
         ]);
     })->name('admin.access-matrix.update');
+
+    // Web Admin DMS Audit Logging View & Real-Time Stream
+    Route::get('/admin/dms/audit-logs', [DmsAuditViewController::class, 'index'])->name('admin.dms.audit-logs');
+    Route::get('/admin/dms/audit', [DmsAuditViewController::class, 'index'])->name('admin.dms.audit');
+    Route::match(['put', 'patch', 'delete'], '/admin/dms/audit-logs/{id?}', [DmsAuditViewController::class, 'update'])->name('admin.dms.audit-logs.immutable');
 });
 
 require __DIR__.'/auth.php';
