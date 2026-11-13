@@ -18,6 +18,7 @@ class DmsDocument extends Model
     public $incrementing = false;
 
     protected $fillable = [
+        'id',
         'folder_id',
         'user_id',
         'original_name',
